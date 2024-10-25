@@ -59,9 +59,8 @@ void APlayerPaddle::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 void APlayerPaddle::MovePaddle(const FInputActionValue& Value)
 {
 	float AxisValue = Value.Get<float>();
-	UE_LOG(LogTemp, Warning, TEXT("AxisValue: %f"), AxisValue);
 	if (AxisValue != 0.0f)
 	{
-		AddMovementInput(FVector(0.0f, AxisValue, 0.0f));
+		AddMovementInput(FVector(0.0f, AxisValue, 0.0f), 0.5f);
 	}
 }
