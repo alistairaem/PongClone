@@ -1,8 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GameMode/PlayerCpuGameMode.h"
 #include "Paddle/PlayerPaddle.h"
+#include "Paddle/CpuPaddle.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/World.h"
@@ -10,38 +8,43 @@
 APlayerCpuGameMode::APlayerCpuGameMode()
 {
 	DefaultPawnClass = nullptr;
-	static ConstructorHelpers::FClassFinder<APlayerPaddle> PaddleBPClass(TEXT("/Game/BluePrints/BP_PlayerPaddle"));
-	if (PaddleBPClass.Class != nullptr)
-	{
-		PlayerPaddleClass = PaddleBPClass.Class;
-	}
 }
 
 void APlayerCpuGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	SpawnPaddles();
+	if (PlayerPaddleClass != nullptr || CpuPaddleClass != nullptr)
+	{
+		SpawnPaddles();
+	}
 }
 
-void APlayerCpuGameMode::SpawnPaddles()
+void APlayerCpuGameMode::SpawnPaddle(TSubclassOf<AActor> PaddleClass, const FName& SpawnTag, int32 PlayerControllerIndex = -1)
 {
-	TArray<AActor*> LeftSpawnPoints;
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LeftPaddleSpawn"), LeftSpawnPoints);
+	TArray<AActor*> SpawnPoints;
+	UGameplayStatics::GetAllActorsWithTag(this, SpawnTag, SpawnPoints);
 
-	if (LeftSpawnPoints.Num() > 0 && PlayerPaddleClass)
+	if (SpawnPoints.Num() > 0 && PaddleClass)
 	{
-		AActor* LeftSpawnPoint = LeftSpawnPoints[0];
-		FVector SpawnLocation = LeftSpawnPoint->GetActorLocation();
-		FRotator SpawnRotation = LeftSpawnPoint->GetActorRotation();
-		APlayerPaddle* SpawnedPaddle = GetWorld()->SpawnActor<APlayerPaddle>(
-			PlayerPaddleClass, SpawnLocation, SpawnRotation);
-		if (SpawnedPaddle)
+		AActor* SpawnPoint = SpawnPoints[0];
+		FVector SpawnLocation = SpawnPoint->GetActorLocation();
+		FRotator SpawnRotation = SpawnPoint->GetActorRotation();
+        
+		AActor* SpawnedPaddle = GetWorld()->SpawnActor<AActor>(PaddleClass, SpawnLocation, SpawnRotation);
+        
+		if (PlayerControllerIndex >= 0 && SpawnedPaddle)
 		{
-			if (APlayerController* PlayerController = Cast<APlayerController>(
-				UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+			if (APlayerController* PlayerController = Cast<APlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), PlayerControllerIndex)))
 			{
-				PlayerController->Possess(SpawnedPaddle);
+				PlayerController->Possess(Cast<APawn>(SpawnedPaddle));
 			}
 		}
 	}
 }
+
+void APlayerCpuGameMode::SpawnPaddles()
+{
+	SpawnPaddle(PlayerPaddleClass, FName("LeftPaddleSpawn"), 0); 
+	SpawnPaddle(CpuPaddleClass, FName("RightPaddleSpawn")); 
+}
+
