@@ -36,6 +36,6 @@ private:
 	UBoxComponent* BoxComponent;
 	UPROPERTY(EditAnywhere, Category = "PaperSprite")
 	UPaperSpriteComponent* PaperSprite;
-	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
+	UPROPERTY(EditAnywhere, Category = "FloatingMovementComponent")
 	UFloatingPawnMovement* FloatingMovementComponent;
 };
