@@ -61,6 +61,6 @@ void APlayerPaddle::MovePaddle(const FInputActionValue& Value)
 	float AxisValue = Value.Get<float>();
 	if (AxisValue != 0.0f)
 	{
-		AddMovementInput(FVector(0.0f, AxisValue, 0.0f), 0.5f);
+		AddMovementInput(FVector(0.0f, AxisValue, 0.0f), 0.4f);
 	}
 }

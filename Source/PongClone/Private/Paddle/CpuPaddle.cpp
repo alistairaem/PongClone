@@ -3,6 +3,8 @@
 #include "PaperSpriteComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
+#include "Ball/Ball.h"
 
 ACpuPaddle::ACpuPaddle()
 {
@@ -60,7 +62,9 @@ void ACpuPaddle::MovePaddle(float Value, float DeltaTime)
 void ACpuPaddle::CheckBallPosition(float DeltaTime)
 {
 	if (Ball == nullptr) return;
-
+	ABall* BallActor = Cast<ABall>(Ball);
+	if (BallActor == nullptr) return;
+	if (BallActor->GetDirection().X > 0.0f) return;
 	float BallYLocation = Ball->GetActorLocation().Y;
 	float PaddleYLocation = GetActorLocation().Y;
 
