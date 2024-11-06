@@ -37,7 +37,7 @@ void APlayerPaddle::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	if (const APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<
 			UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -58,7 +58,7 @@ void APlayerPaddle::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void APlayerPaddle::MovePaddle(const FInputActionValue& Value)
 {
-	float AxisValue = Value.Get<float>();
+	const float AxisValue = Value.Get<float>();
 	if (AxisValue != 0.0f)
 	{
 		AddMovementInput(FVector(0.0f, AxisValue, 0.0f), 0.4f);

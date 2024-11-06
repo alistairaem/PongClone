@@ -36,20 +36,31 @@ void ABall::Tick(float DeltaTime)
 
 void ABall::ResetBall()
 {
+	FVector NewLocation = GetActorLocation();
+	NewLocation.X = 0.0f;
+	NewLocation.Y = FMath::FRandRange(-100.0f, 100.0f);
+	SetActorLocation(NewLocation);
 	Direction = FVector(0.0f, 0.0f, 0.0f);
 	GetWorld()->GetTimerManager().SetTimer(DirectionResetTimerHandle, this, &ABall::SetRandomDirection, 1.0f, false);
 }
 
 void ABall::SetRandomDirection()
 {
-	float RandomX = FMath::FRandRange(-1.0f, 1.0f);
-	float RandomY = FMath::FRandRange(-1.0f, 1.0f);
-	Direction = FVector(RandomX, RandomY, 0.0f).GetSafeNormal();
+	FVector RandomDirection;
+	do
+	{
+		const float RandomX = FMath::FRandRange(-1.0f, 1.0f);
+		const float RandomY = FMath::FRandRange(-0.25f, 0.25f);
+		RandomDirection = FVector(RandomX, RandomY, 0.0f).GetSafeNormal();
+	}
+	while (RandomDirection.IsNearlyZero());
+
+	Direction = RandomDirection;
 }
 
 void ABall::MoveBall(float DeltaTime)
 {
-	FVector NewLocation = GetActorLocation() + (Direction * Speed * DeltaTime);
+	const FVector NewLocation = GetActorLocation() + (Direction * Speed * DeltaTime);
 	SetActorLocation(NewLocation, true);
 }
 

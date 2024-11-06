@@ -54,7 +54,7 @@ void ACpuPaddle::MovePaddle(float Value, float DeltaTime)
 			return;
 		}
 
-		FVector NewLocation = GetActorLocation() + FVector(0.0f, Value * PaddleSpeed * DeltaTime, 0.0f);
+		const FVector NewLocation = GetActorLocation() + FVector(0.0f, Value * PaddleSpeed * DeltaTime, 0.0f);
 		SetActorLocation(NewLocation);
 	}
 }
@@ -62,13 +62,13 @@ void ACpuPaddle::MovePaddle(float Value, float DeltaTime)
 void ACpuPaddle::CheckBallPosition(float DeltaTime)
 {
 	if (Ball == nullptr) return;
-	ABall* BallActor = Cast<ABall>(Ball);
+	const ABall* BallActor = Cast<ABall>(Ball);
 	if (BallActor == nullptr) return;
 	if (BallActor->GetDirection().X > 0.0f) return;
-	float BallYLocation = Ball->GetActorLocation().Y;
-	float PaddleYLocation = GetActorLocation().Y;
+	const float BallYLocation = Ball->GetActorLocation().Y;
+	const float PaddleYLocation = GetActorLocation().Y;
 
-	float Threshold = 10.0f;
+	const float Threshold = 10.0f;
 
 	if (FMath::Abs(BallYLocation - PaddleYLocation) > Threshold)
 	{
