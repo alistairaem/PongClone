@@ -2,6 +2,7 @@
 #include "Components/BoxComponent.h"
 #include "PaperFlipbookComponent.h"
 #include "Ball/Ball.h"
+#include "Components/AudioComponent.h"
 #include "GameMode/PlayerCpuGameMode.h"
 #include "Engine/World.h"
 
@@ -14,6 +15,9 @@ AGoal::AGoal()
 
 	PaperFlipbook = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("PaperFlipbook"));
 	PaperFlipbook->SetupAttachment(RootComponent);
+
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	AudioComponent->SetupAttachment(RootComponent);
 }
 
 void AGoal::BeginPlay()
@@ -21,6 +25,7 @@ void AGoal::BeginPlay()
 	Super::BeginPlay();
 	GameMode = Cast<APlayerCpuGameMode>(GetWorld()->GetAuthGameMode());
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &AGoal::BeginOverlap);
+	AudioComponent->SetSound(GoalHitSound);
 }
 
 void AGoal::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -40,6 +45,9 @@ void AGoal::Tick(float DeltaTime)
 void AGoal::GoalScored() const
 {
 	if (GameMode == nullptr) return;
-
 	GameMode->HandleGoalScored(BoxComponent->ComponentTags[0].ToString());
+	if (AudioComponent == nullptr) return;
+	const float RandomPitch = FMath::FRandRange(0.75f, 1.25f);
+	AudioComponent->SetPitchMultiplier(RandomPitch);
+	AudioComponent->Play();
 }

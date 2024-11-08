@@ -1,12 +1,15 @@
 #pragma once
-
-#include <xstring>
-
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "PlayerCpuGameMode.generated.h"
 
+class UWidgetComponent;
+class AGoal;
+class ACpuPaddle;
+class APlayerPaddle;
 class ABall;
+class UUserWidget;
+
 /**
  * 
  */
@@ -29,6 +32,7 @@ private:
 	void SpawnPaddle(const TSubclassOf<AActor>& PaddleClass, const FName& SpawnTag, int32 PlayerControllerIndex) const;
 
 	void SpawnGoal(const FString& SpawnTag, const FString& PlayerTag) const;
+
 public:
 	APlayerCpuGameMode();
 
@@ -38,18 +42,23 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Paddle")
-	TSubclassOf<class APlayerPaddle> PlayerPaddleClass;
+	TSubclassOf<APlayerPaddle> PlayerPaddleClass;
 
 	UPROPERTY(EditDefaultsOnly, Category="Paddle Cpu")
-	TSubclassOf<class ACpuPaddle> CpuPaddleClass;
+	TSubclassOf<ACpuPaddle> CpuPaddleClass;
 
 	UPROPERTY(EditDefaultsOnly, Category="Ball")
-	TSubclassOf<class ABall> BallClass;
+	TSubclassOf<ABall> BallClass;
 
 	UPROPERTY(EditDefaultsOnly, Category="Goal")
-	TSubclassOf<class AGoal> GoalClass;
+	TSubclassOf<AGoal> GoalClass;
+
+	UPROPERTY()
+	UWidgetComponent* ScoreWidgetInstance;
 
 	void SpawnPaddles() const;
 	void SpawnBall();
 	void ResetGame() const;
+
+	void UpdateScore() const;
 };

@@ -5,15 +5,18 @@
 #include "Ball/Goal.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "UObject/ConstructorHelpers.h"
 #include "Engine/World.h"
 #include "EngineMinimal.h"
+#include "Blueprint/UserWidget.h"
+#include "Components/TextBlock.h"
+#include "Components/WidgetComponent.h"
 
 APlayerCpuGameMode::APlayerCpuGameMode()
 {
 	DefaultPawnClass = nullptr;
 	SpawnedBall = nullptr;
 	BallSpawnPoint = nullptr;
+	ScoreWidgetInstance = nullptr;
 }
 
 void APlayerCpuGameMode::BeginPlay()
@@ -31,6 +34,14 @@ void APlayerCpuGameMode::BeginPlay()
 	{
 		SpawnGoal("P1GoalSpawn", Player1Tag);
 		SpawnGoal("P2GoalSpawn", CpuTag);
+	}
+
+	TArray<AActor*> UiComponents;
+	UGameplayStatics::GetAllActorsWithTag(this, "ScoreUI", UiComponents);
+	if (UiComponents.Num() > 0)
+	{
+		const AActor* ScoreActor = UiComponents[0];
+		ScoreWidgetInstance = ScoreActor->FindComponentByClass<UWidgetComponent>();
 	}
 }
 
@@ -81,13 +92,13 @@ void APlayerCpuGameMode::HandleGoalScored(const FString& GoalTag)
 	if (GoalTag == Player1Tag)
 	{
 		++CpuScore;
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "CPU Scored!");
 	}
 	else if (GoalTag == CpuTag)
 	{
 		++PlayerScore;
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, "Player Scored!");
 	}
+
+	UpdateScore();
 	ResetGame();
 }
 
@@ -105,9 +116,9 @@ void APlayerCpuGameMode::SpawnBall()
 	if (SpawnPoints.Num() > 0 && BallActorClass)
 	{
 		BallSpawnPoint = SpawnPoints[0];
-		const FVector SpawnLocation = BallSpawnPoint->GetActorLocation();
+		FVector SpawnLocation = BallSpawnPoint->GetActorLocation();
 		const FRotator SpawnRotation = BallSpawnPoint->GetActorRotation();
-
+		SpawnLocation.Z += 50.0f;
 		AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(BallActorClass, SpawnLocation, SpawnRotation);
 		SpawnedBall = Cast<ABall>(SpawnedActor);
 		SpawnedBall->ResetBall();
@@ -121,5 +132,26 @@ void APlayerCpuGameMode::ResetGame() const
 		SpawnedBall->GetActorLocation() = BallSpawnPoint->GetActorLocation();
 		SpawnedBall->GetActorRotation() = BallSpawnPoint->GetActorRotation();
 		SpawnedBall->ResetBall();
+	}
+}
+
+void APlayerCpuGameMode::UpdateScore() const
+{
+	if (ScoreWidgetInstance)
+	{
+		UUserWidget* MyScoreWidget = Cast<UUserWidget>(ScoreWidgetInstance->GetUserWidgetObject());
+
+		UTextBlock* PlayerTextBlock = Cast<UTextBlock>(MyScoreWidget->GetWidgetFromName(TEXT("ScoreLeft")));
+		UTextBlock* CpuTextBlock = Cast<UTextBlock>(MyScoreWidget->GetWidgetFromName(TEXT("ScoreRight")));
+
+		if (PlayerTextBlock)
+		{
+			PlayerTextBlock->SetText(FText::AsNumber(PlayerScore));
+		}
+
+		if (CpuTextBlock)
+		{
+			CpuTextBlock->SetText(FText::AsNumber(CpuScore));
+		}
 	}
 }

@@ -7,6 +7,7 @@
 class UPaperFlipbookComponent;
 class APlayerCpuGameMode;
 class UBoxComponent;
+class UAudioComponent;
 
 UCLASS()
 class PONGCLONE_API AGoal : public AActor
@@ -29,6 +30,10 @@ private:
 	UBoxComponent* BoxComponent;
 	UPROPERTY(EditAnywhere, Category = "PaperFlipbook")
 	UPaperFlipbookComponent* PaperFlipbook;
+	UPROPERTY(EditAnywhere, Category="Audio")
+	USoundBase* GoalHitSound;
+	UPROPERTY()
+	UAudioComponent* AudioComponent;
 	UPROPERTY()
 	APlayerCpuGameMode* GameMode;
 

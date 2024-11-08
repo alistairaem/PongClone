@@ -4,7 +4,11 @@
 #include "Math/UnrealMathUtility.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Ball/Goal.h"
+#include "Components/AudioComponent.h"
 #include "Engine/Engine.h"
+#include "Paddle/CpuPaddle.h"
+#include "Paddle/PlayerPaddle.h"
 
 ABall::ABall()
 {
@@ -14,12 +18,26 @@ ABall::ABall()
 
 	PaperSprite = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("PaperSprite"));
 	PaperSprite->SetupAttachment(RootComponent);
+
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	AudioComponent->SetupAttachment(RootComponent);
 }
 
 void ABall::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                   FVector NormalImpulse, const FHitResult& Hit)
 {
 	Bounce(Hit.Normal);
+	if (AudioComponent == nullptr) return;
+	if (OtherActor->IsA(APlayerPaddle::StaticClass()) || OtherActor->IsA(ACpuPaddle::StaticClass()))
+	{
+		CurrentSpeed += 20.0f;
+		const float RandomPitch = FMath::FRandRange(0.75f, 1.25f);
+		ReproduceSound(PaddleHitSound, RandomPitch);
+	}
+	else if (!OtherActor->IsA(AGoal::StaticClass()))
+	{
+		ReproduceSound(WallHitSound);
+	}
 }
 
 void ABall::BeginPlay()
@@ -36,6 +54,7 @@ void ABall::Tick(float DeltaTime)
 
 void ABall::ResetBall()
 {
+	CurrentSpeed = Speed;
 	FVector NewLocation = GetActorLocation();
 	NewLocation.X = 0.0f;
 	NewLocation.Y = FMath::FRandRange(-100.0f, 100.0f);
@@ -60,11 +79,18 @@ void ABall::SetRandomDirection()
 
 void ABall::MoveBall(float DeltaTime)
 {
-	const FVector NewLocation = GetActorLocation() + (Direction * Speed * DeltaTime);
+	const FVector NewLocation = GetActorLocation() + (Direction * CurrentSpeed * DeltaTime);
 	SetActorLocation(NewLocation, true);
 }
 
 void ABall::Bounce(const FVector& Normal)
 {
 	Direction = Direction.MirrorByVector(Normal);
+}
+
+void ABall::ReproduceSound(USoundBase* Sound, float Pitch) const
+{
+	AudioComponent->SetPitchMultiplier(Pitch);
+	AudioComponent->SetSound(Sound);
+	AudioComponent->Play();
 }

@@ -6,6 +6,7 @@
 
 class USphereComponent;
 class UPaperSpriteComponent;
+class UAudioComponent;
 
 UCLASS()
 class PONGCLONE_API ABall : public AActor
@@ -35,10 +36,23 @@ private:
 	UPaperSpriteComponent* PaperSprite;
 	UPROPERTY(EditAnywhere, Category = "Speed")
 	float Speed = 300.0f;
+	UPROPERTY()
+	float CurrentSpeed;
+
+	UPROPERTY(EditAnywhere, Category="Audio")
+	USoundBase* WallHitSound;
+	UPROPERTY(EditAnywhere, Category="Audio")
+	USoundBase* PaddleHitSound;
+
+
 	FTimerHandle DirectionResetTimerHandle;
 
 	FVector Direction;
 
+	UPROPERTY()
+	UAudioComponent* AudioComponent;
+
 	void MoveBall(float DeltaTime);
 	void Bounce(const FVector& Normal);
+	void ReproduceSound(USoundBase* Sound, float Pitch = 1.0f) const;
 };
